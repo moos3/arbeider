@@ -2,9 +2,9 @@
 require_once __DIR__ . '/vendor/autoload.php';
 use PhpAmqpLib\Connection\AMQPConnection;
 
-$connection = new AMQPConnection('rabbitmq', 5672, 'guest', 'guest');
+$connection = new AMQPConnection(getenv('RABBITMQ_NODE'), getenv('RABBITMQ_PORT'), 'guest', 'guest');
 $channel = $connection->channel();
-$channel->queue_declare('hello', false, false, false, false);
+$channel->queue_declare(getenv('RABBITMQ_QUEUE'), false, false, false, false);
 
 global $apikey;
 $apikey = getenv('WOKER_API_KEY');
@@ -19,16 +19,25 @@ function runCommand($msg){
 	}
 }
 
+function getCommitRevision(){
+	$command = 'git rev-parse HEAD';
+	exec('cd '.getenv('APP_ROOT').' && '.$command, $rev);
+	return $rev;
+}
+
 echo ' [*] Waiting for messages. To exit press CTRL+C', "\n";
 $callback = function($msg) {
   echo " [x] Received ", $msg->body, "\n";
-  runCommand($msg->body);
+	$rev = getCommitRevision();
+	if ($msg['build']['commit_id'] != $rev ){
+  	runCommand($msg->body);
+	}
 };
-$channel->basic_consume('hello', '', false, true, false, false, $callback);
+
+$channel->basic_consume(getenv('RABBITMQ_QUEUE'), '', false, true, false, false, $callback);
 while(count($channel->callbacks)) {
     $channel->wait();
 }
-
 $channel->close();
 $connection->close();
 
