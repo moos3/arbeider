@@ -18,15 +18,16 @@ function trigger($command){
 }
 
 $key = explode('=', $_SERVER['QUERY_STRING']);
-$notification = json_decode(file_get_contents('php://input'),true);
-$notifcation['apikey'] = $key[1];
-
+$notification = json_decode(file_get_contents('php://input'),TRUE);
+$notification['apikey'] = $key[1];
 
 if ($notification['apikey'] == $apikey){
   if ($notification['build']['project_id'] == getenv('CODESHIP_PROJECT_ID')){
     if ($notification['build']['status'] == 'success'){
       trigger('update', $notification);
     }
+  } else {
+    echo 'Project Authentication Failure!';
   }
 } else {
   echo 'Authentication Failed!';
