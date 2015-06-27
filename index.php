@@ -20,8 +20,10 @@ function trigger($command){
 $notification = $_POST;
 
 if ($notification['apikey'] == $apikey){
-  if ($notification['build']['status'] == 'success'){
-    trigger('update', $notification);
+  if ($notification['build']['project_id'] == getenv('CODESHIP_PROJECT_ID')){
+    if ($notification['build']['status'] == 'success'){
+      trigger('update', $notification);
+    }
   }
 } else {
   echo 'Authentication Failed!'
