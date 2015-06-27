@@ -26,7 +26,7 @@ if ($notification['apikey'] == $apikey){
     }
   }
 } else {
-  echo 'Authentication Failed!'
+  echo 'Authentication Failed!';
 }
 
 
