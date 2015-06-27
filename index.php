@@ -17,7 +17,10 @@ function trigger($command){
   $channel->basic_publish($msg, '', 'hello');
 }
 
-$notification = $_POST;
+$key = explode('=', $_SERVER['QUERY_STRING']);
+$notification = json_decode(file_get_contents('php://input'),true);
+$notifcation['apikey'] = $key[1];
+
 
 if ($notification['apikey'] == $apikey){
   if ($notification['build']['project_id'] == getenv('CODESHIP_PROJECT_ID')){
