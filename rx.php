@@ -3,7 +3,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 use PhpAmqpLib\Connection\AMQPConnection;
 
 global $apikey;
-$apikey = getenv('WOKER_API_KEY');
+$apikey = getenv('WORKER_API_KEY');
 
 function runCommand($msg){
 	global $apikey;
@@ -27,14 +27,13 @@ try {
 
 	$channel->queue_declare(getenv('RABBITMQ_QUEUE'), false, false, false, false);
 
-
 	echo ' [*] Waiting for messages. To exit press CTRL+C', "\n";
 	$callback = function($msg) {
 	  echo " [x] Received ", $msg->body, "\n";
 		$rev = getCommitRevision();
-		if ($msg['build']['commit_id'] != $rev ){
+//		if ($msg['build']['commit_id'] != $rev ){
 	  	runCommand($msg->body);
-		}
+//		}
 	};
 
 	$channel->basic_consume(getenv('RABBITMQ_QUEUE'), '', false, true, false, false, $callback);

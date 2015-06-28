@@ -5,13 +5,13 @@ use PhpAmqpLib\Message\AMQPMessage;
 
 $apikey = getenv('WEBHOOK_API_KEY');
 
-function trigger($command){
+function trigger($command,$notification){
   $connection = new AMQPConnection(getenv('RABBITMQ_NODE'), getenv('RABBITMQ_PORT'), 'guest', 'guest');
   $channel = $connection->channel();
   $channel->queue_declare(getenv('RABBITMQ_NAME'), false, false, false, false);
 
-  $apikey = getenv('WORKER_API_KEY');
-  $msg = array ('apikey'=>$apikey, 'git_command' => $command);
+  $worker_apikey = getenv('WORKER_API_KEY');
+  $msg = array ('apikey'=>$worker_apikey, 'git_command' => $command);
 
   $msg = new AMQPMessage(json_encode($msg));
   $channel->basic_publish($msg, '', 'hello');
@@ -28,9 +28,13 @@ if ($notification['apikey'] == $apikey){
     }
   } else {
     echo 'Project Authentication Failure!';
+    error_log('Project Authentication Failure');
+    error_log(var_export($notification).PHP_EOL);
   }
 } else {
   echo 'Authentication Failed!';
+  error_log('Authentication Failure');
+  error_log(var_export($notification).PHP_EOL);
 }
 
 
