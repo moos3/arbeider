@@ -19,7 +19,7 @@ try {
 	$connection = new AMQPConnection(getenv('RABBITMQ_NODE') ?: '127.0.0.1', getenv('RABBITMQ_PORT') ?: '5672', getenv('WORKERMQ_USERNAME') ?: 'guest', getenv('WORKERMQ_PASSWORD') ?: 'guest');
 	$channel = $connection->channel();
 
-	$channel->queue_declare(getenv('RABBITMQ_QUEUE') ?: 'hello', false, false, false, false);
+	$channel->exchange_declare(getenv('RABBITMQ_QUEUE') ?: 'hello', 'fanout', false, false, false);
 
 	echo ' [*] Waiting for messages. To exit press CTRL+C', "\n";
 	$callback = function($msg) {

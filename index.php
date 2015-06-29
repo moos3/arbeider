@@ -8,13 +8,13 @@ $apikey = getenv('WEBHOOK_API_KEY');
 function trigger($command,$notification){
   $connection = new AMQPConnection(getenv('RABBITMQ_NODE'), getenv('RABBITMQ_PORT'), 'guest', 'guest');
   $channel = $connection->channel();
-  $channel->queue_declare(getenv('RABBITMQ_NAME'), false, false, false, false);
+  $channel->exchange_declare(getenv('RABBITMQ_NAME'), 'fanout', false, false, false);
 
   $worker_apikey = getenv('WORKER_API_KEY');
   $msg = array ('apikey'=>$worker_apikey, 'git_command' => $command);
 
   $msg = new AMQPMessage(json_encode($msg));
-  $channel->basic_publish($msg, '', 'hello');
+  $channel->basic_publish($msg, '', getenv('RABBITMQ_NAME') ?: 'hello');
 }
 
 $key = explode('=', $_SERVER['QUERY_STRING']);

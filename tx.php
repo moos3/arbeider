@@ -5,7 +5,7 @@ use PhpAmqpLib\Message\AMQPMessage;
 
 $connection = new AMQPConnection('rabbitmq', 5672, 'guest', 'guest');
 $channel = $connection->channel();
-$channel->queue_declare('hello', false, false, false, false);
+$channel->exchange_declare(getenv('RABBITMQ_NAME') ?: 'hello', 'fanout', false, false, false);
 
 $apikey = getenv('WORKER_API_KEY');
 $msg = array ('apikey'=>$apikey, 'git_command' => 'update');
