@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
 
+sed -i "s/myapikey/$WEBHOOK_API_KEY/" /worker/config.inc
+sed -i "s/worker_key/$WORKER_API_KEY/" /worker/config.inc
+sed -i "s/mycodeship_id/$CODESHIP_PROJECT_ID/" /worker/config.inc
+
 php /worker/rx.php
