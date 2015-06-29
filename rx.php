@@ -15,28 +15,20 @@ function runCommand($msg){
 	}
 }
 
-function getCommitRevision(){
-	$command = 'git rev-parse HEAD';
-	exec('cd '.getenv('APP_ROOT').' && '.$command, $rev);
-	return $rev;
-}
-
 try {
-	$connection = new AMQPConnection(getenv('RABBITMQ_NODE'), getenv('RABBITMQ_PORT'), 'guest', 'guest');
+	$connection = new AMQPConnection(getenv('RABBITMQ_NODE') ?: '127.0.0.1', getenv('RABBITMQ_PORT') ?: '5672', getenv('WORKERMQ_USERNAME') ?: 'guest', getenv('WORKERMQ_PASSWORD') ?: 'guest');
 	$channel = $connection->channel();
 
-	$channel->queue_declare(getenv('RABBITMQ_QUEUE'), false, false, false, false);
+	$channel->queue_declare(getenv('RABBITMQ_QUEUE') ?: 'hello', false, false, false, false);
 
 	echo ' [*] Waiting for messages. To exit press CTRL+C', "\n";
 	$callback = function($msg) {
 	  echo " [x] Received ", $msg->body, "\n";
 		$rev = getCommitRevision();
-//		if ($msg['build']['commit_id'] != $rev ){
 	  	runCommand($msg->body);
-//		}
 	};
 
-	$channel->basic_consume(getenv('RABBITMQ_QUEUE'), '', false, true, false, false, $callback);
+	$channel->basic_consume(getenv('RABBITMQ_QUEUE') ?: 'hello', '', false, true, false, false, $callback);
 	while(count($channel->callbacks)) {
 	    $channel->wait();
 	}
