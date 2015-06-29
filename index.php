@@ -3,18 +3,20 @@ require_once __DIR__ . '/vendor/autoload.php';
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 
-$apikey = getenv('WEBHOOK_API_KEY');
+include('config.inc');
 
 function trigger($command,$notification){
-  $connection = new AMQPConnection(getenv('RABBITMQ_NODE'), getenv('RABBITMQ_PORT'), 'guest', 'guest');
+  global $rabbitmq_node, $rabbitmq_port, $rabbitmq_name, $apikey, $worker_apikey;
+  $connection = new AMQPConnection($rabbitmq_node, $rabbitmq_port ?: 5672, 'guest', 'guest');
   $channel = $connection->channel();
-  $channel->exchange_declare(getenv('RABBITMQ_NAME'), 'fanout', false, false, false);
+  $channel->exchange_declare($rabbitmq_name, 'fanout', false, false, false);
 
-  $worker_apikey = getenv('WORKER_API_KEY');
   $msg = array ('apikey'=>$worker_apikey, 'git_command' => $command);
 
   $msg = new AMQPMessage(json_encode($msg));
-  $channel->basic_publish($msg, getenv('RABBITMQ_NAME') ?: 'hello');
+  $channel->basic_publish($msg, $rabbitmq_name ?: 'hello');
+  $channel->close();
+  $connection->close();
 }
 
 $key = explode('=', $_SERVER['QUERY_STRING']);
@@ -22,7 +24,7 @@ $notification = json_decode(file_get_contents('php://input'),TRUE);
 $notification['apikey'] = $key[1];
 
 if ($notification['apikey'] == $apikey){
-  if ($notification['build']['project_id'] == getenv('CODESHIP_PROJECT_ID')){
+  if ($notification['build']['project_id'] == $codeship_project_id){
     if ($notification['build']['status'] == 'success'){
       trigger('update', $notification);
     }
