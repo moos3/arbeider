@@ -1,5 +1,14 @@
 {
     "require": {
-        "videlalvaro/php-amqplib": "v2.1.0"
+        "videlalvaro/php-amqplib": "v2.1.0",
+	"monolog/monolog":"1.11.0",
+	"symfony/dependency-injection":"2.1.*"
+    },
+    "require-dev":{
+	"phake/phake":"1.*",
+        "phpunit/phpunit": "4.3.*"
+    },
+    "autoload":{
+       "psr-4": { "":"src/"}
     }
 }

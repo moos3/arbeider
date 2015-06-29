@@ -16,26 +16,28 @@ function runCommand($msg){
 }
 
 try {
-	$connection = new AMQPConnection(getenv('RABBITMQ_NODE') ?: '127.0.0.1', getenv('RABBITMQ_PORT') ?: '5672', getenv('WORKERMQ_USERNAME') ?: 'guest', getenv('WORKERMQ_PASSWORD') ?: 'guest');
-	$channel = $connection->channel();
+  $connection = new AMQPConnection(getenv('RABBITMQ_NODE'), '5672', 'guest', 'guest');
+  $channel = $connection->channel();
 
-	$channel->exchange_declare(getenv('RABBITMQ_QUEUE') ?: 'hello', 'fanout', false, false, false);
+  $channel->exchange_declare('hello', 'fanout', false, false, false);
+  list($queue_name, ,) = $channel->queue_declare("", false, false, true, false);
+  $channel->queue_bind($queue_name, 'hello');
 
-	echo ' [*] Waiting for messages. To exit press CTRL+C', "\n";
-	$callback = function($msg) {
-	  echo " [x] Received ", $msg->body, "\n";
-	  	runCommand($msg->body);
-	};
+  echo ' [*] Waiting for messages. To exit press CTRL+C', "\n";
+  $callback = function($msg) {
+    echo " [x] Received ", $msg->body, "\n";
+          runCommand($msg->body);
+  };
 
-	$channel->basic_consume(getenv('RABBITMQ_QUEUE') ?: 'hello', '', false, true, false, false, $callback);
-	while(count($channel->callbacks)) {
-	    $channel->wait();
-	}
-	$channel->close();
-	$connection->close();
+  $channel->basic_consume($queue_name, '', false, true, false, false, $callback);
+  while(count($channel->callbacks)) {
+      $channel->wait();
+  }
+  $channel->close();
+  $connection->close();
 
 } catch (Exception $e) {
-	echo "rabbitmq is currently down".PHP_EOL;
+        echo "rabbitmq is currently down".PHP_EOL;
 }
 
 
