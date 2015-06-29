@@ -14,7 +14,7 @@ function trigger($command,$notification){
   $msg = array ('apikey'=>$worker_apikey, 'git_command' => $command);
 
   $msg = new AMQPMessage(json_encode($msg));
-  $channel->basic_publish($msg, '', getenv('RABBITMQ_NAME') ?: 'hello');
+  $channel->basic_publish($msg, getenv('RABBITMQ_NAME') ?: 'hello');
 }
 
 $key = explode('=', $_SERVER['QUERY_STRING']);

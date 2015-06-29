@@ -16,12 +16,12 @@ function runCommand($msg){
 }
 
 try {
-  $connection = new AMQPConnection(getenv('RABBITMQ_NODE'), '5672', 'guest', 'guest');
+  $connection = new AMQPConnection(getenv('RABBITMQ_NODE'), getenv('RABBITMQ_PORT'), 'guest', 'guest');
   $channel = $connection->channel();
 
-  $channel->exchange_declare('hello', 'fanout', false, false, false);
+  $channel->exchange_declare(getenv('RABBITMQ_NAME') ?: 'hello', 'fanout', false, false, false);
   list($queue_name, ,) = $channel->queue_declare("", false, false, true, false);
-  $channel->queue_bind($queue_name, 'hello');
+  $channel->queue_bind($queue_name, getenv('RABBITMQ_NAME') ?: 'hello');
 
   echo ' [*] Waiting for messages. To exit press CTRL+C', "\n";
   $callback = function($msg) {

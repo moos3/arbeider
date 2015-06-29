@@ -11,7 +11,7 @@ $apikey = getenv('WORKER_API_KEY');
 $msg = array ('apikey'=>$apikey, 'git_command' => 'update');
 
 $msg = new AMQPMessage(json_encode($msg));
-$channel->basic_publish($msg, '', 'hello');
+$channel->basic_publish($msg, 'hello');
 echo " [x] Sent ".var_export($msg)."\n";
 $channel->close();
 $connection->close();
