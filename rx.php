@@ -24,7 +24,6 @@ try {
 	echo ' [*] Waiting for messages. To exit press CTRL+C', "\n";
 	$callback = function($msg) {
 	  echo " [x] Received ", $msg->body, "\n";
-		$rev = getCommitRevision();
 	  	runCommand($msg->body);
 	};
 
