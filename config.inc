@@ -8,3 +8,4 @@ $rabbitmq_name = 'hello';
 $apikey = 'myapikey';
 $worker_apikey ='worker_key';
 $codeship_project_id = mycodeship_id;
+$codeship_trigger_branch = 'master';

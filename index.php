@@ -26,7 +26,9 @@ $notification['apikey'] = $key[1];
 if ($notification['apikey'] == $apikey){
   if ($notification['build']['project_id'] == $codeship_project_id){
     if ($notification['build']['status'] == 'success'){
-      trigger('update', $notification);
+      if ($notification['build']['branch'] == $codeship_trigger_branch){
+        trigger('update', $notification);
+      }
     }
   } else {
     echo 'Project Authentication Failure!';
